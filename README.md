@@ -8,3 +8,4 @@ Basic GAE project with Jinja templating engine
 2. Save on your disk and unzip
 3. Change the application ID in app.yaml
 4. Build something nice ;)
+# guestbook
