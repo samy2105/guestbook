@@ -36,7 +36,7 @@ class MainHandler(BaseHandler):
 
 class GuestbookHandler(BaseHandler):
     def get(self):
-        messages = Message.query().fetch()
+        messages = Message.query(Message.deleted == False).fetch()
 
         params = {"messages": messages}
 
@@ -50,12 +50,51 @@ class GuestbookHandler(BaseHandler):
         if not author:
             author = "Anonymous"
 
-        msg_object = Message(author_name=author, email=email, message=message) # Bezeichnungen in der Database
+        if "<script>" in message:
+            return self.write("no way")
+
+
+        msg_object = Message(author_name=author, email=email, message=message.replace("<script>", "")) # Bezeichnungen in der Database
         msg_object.put()
+
+        return self.redirect_to("Gästebuch")
+
+class MessageEditHandler(BaseHandler):
+    def get(self, message_id):
+        message = Message.get_by_id(int(message_id))
+
+        params = {"message": message}
+
+        return self.render_template("message_edit.html", params=params)
+
+    def post(self, message_id):
+        message = Message.get_by_id(int(message_id))
+
+        text = self.request.get("message")
+        message.message = text
+        message.put()
+
+        return self.redirect_to("Gästebuch")
+
+class MessageDeleteHandler(BaseHandler):
+    def get(self, message_id):
+        message = Message.get_by_id(int(message_id))
+
+        params = {"message": message}
+
+        return self.render_template("message_delete.html", params=params)
+
+    def post(self, message_id):
+        message = Message.get_by_id(int(message_id))
+
+        message.deleted = True
+        message.put()
 
         return self.redirect_to("Gästebuch")
 
 app = webapp2.WSGIApplication([
     webapp2.Route('/', MainHandler),
     webapp2.Route('/guestbook', GuestbookHandler, name="Gästebuch"),
+    webapp2.Route('/message/<message_id:\d+>/edit', MessageEditHandler, name="message-edit"),
+    webapp2.Route('/message/<message_id:\d+>/delete', MessageDeleteHandler, name="message-delete"),
 ], debug=True)

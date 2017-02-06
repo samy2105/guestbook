@@ -23,7 +23,10 @@
 <h3>Gästebucheinträge</h3>
 {% for message in messages %}
     <p>
-        <strong><a href="mailto:{{message.email}}">{{ message.author_name }}</a></strong>  at {{ message.created.strftime('%d %B %Y at %H:%M') }}:
+        <strong><a href="mailto:{{message.email}}">{{ message.author_name }}</a></strong>
+        at {{ message.created.strftime('%d %B %Y at %H:%M') }}:
+        (<a href="/message/{{message.key.id()}}/edit">editieren</a>,
+        <a href="/message/{{message.key.id()}}/delete">löschen</a>)
         <br>
         <em>{{ message.message }}</em>
     </p>
